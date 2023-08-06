@@ -67,6 +67,8 @@ class SimDvs:
                 else:
                     eventimg[events !=0, :] = 255
 
+                self.annotate(eventimg)
+
                 rows, cols = events.shape
 
                 bigimg = np.zeros((rows, 2*cols, 3)).astype(np.uint8)
@@ -88,6 +90,13 @@ class SimDvs:
         self.image_prev = image
 
         return events
+
+    def annotate(self, eventimg):
+        '''
+        Override this method to annotate the event image.
+        '''
+
+        pass
 
     def _color2gray(self, img):
 
