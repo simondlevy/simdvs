@@ -24,4 +24,5 @@ setup(
         author_email='simon.d.levy@gmail.com',
         url='https://github.com/simondlevy/simdvs',
         packages=['simdvs'],
+        install_requires=['opencv-python']
         )
