@@ -69,12 +69,12 @@ class SimDvs:
             bigimg[:, :cols, :] = image
             bigimg[:, cols:(2*cols), :] = colorimg
 
-            cv2.imshow('Events', cv2.resize(bigimg,
-                                            (self.display_scaleup * bigimg.shape[1],
-                                             self.display_scaleup * bigimg.shape[0])))
+            cv2.imshow('Events',
+                       cv2.resize(bigimg,
+                                  (self.display_scaleup * bigimg.shape[1],
+                                   self.display_scaleup * bigimg.shape[0])))
 
         return eventimg
-
 
     def _color2gray(self, img):
 
