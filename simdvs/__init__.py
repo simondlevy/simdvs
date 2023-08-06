@@ -24,54 +24,60 @@ import cv2
 
 class SimDvs:
 
-    def __init__(self, threshold=0, display_scaleup=0):
+    def __init__(self, threshold=0, display_scaleup=0, quit_key=27):
 
         self.threshold = threshold
         self.display_scaleup = display_scaleup
+        self.quit_key = quit_key
 
         self.image_prev = None
 
     def getEvents(self, image):
-
-        events = None if self.image_prev is None else self._get_events(image)
-
-        self.image_prev = image
-
-        return events
-
-    def _get_events(self, image):
+        '''
+        Returns current event image, or None if user quits display
+        '''
 
         graycurr = self._color2gray(image)
-        grayprev = self._color2gray(self.image_prev)
-
-        diffimg = graycurr - grayprev
 
         eventimg = np.zeros(graycurr.shape, dtype=np.int8)
 
-        eventimg[diffimg > +self.threshold] = +1
-        eventimg[diffimg < -self.threshold] = -1
+        if self.image_prev is not None:
 
-        if self.display_scaleup > 0:
+            grayprev = self._color2gray(self.image_prev)
+            diffimg = graycurr - grayprev
 
-            rows, cols = eventimg.shape
+            eventimg[diffimg > +self.threshold] = +1
+            eventimg[diffimg < -self.threshold] = -1
 
-            colorimg = np.zeros((rows, cols, 3))
-            colorimg[eventimg == +1, 1] = 255
-            colorimg[eventimg == -1, 2] = 255
+            if self.display_scaleup > 0:
 
-            rows, cols = eventimg.shape
+                rows, cols = eventimg.shape
 
-            bigimg = np.zeros((rows, 2*cols, 3)).astype(np.uint8)
+                colorimg = np.zeros((rows, cols, 3))
+                colorimg[eventimg == +1, 1] = 255
+                colorimg[eventimg == -1, 2] = 255
 
-            bigimg[:, :cols, :] = image
-            bigimg[:, cols:(2*cols), :] = colorimg
+                rows, cols = eventimg.shape
 
-            cv2.imshow('Events',
-                    cv2.resize(bigimg,
-                        (self.display_scaleup * bigimg.shape[1],
-                            self.display_scaleup * bigimg.shape[0])))
+                bigimg = np.zeros((rows, 2*cols, 3)).astype(np.uint8)
 
-                        return eventimg
+                bigimg[:, :cols, :] = image
+                bigimg[:, cols:(2*cols), :] = colorimg
+
+                cv2.imshow('Events',
+                           cv2.resize(bigimg,
+                                      (self.display_scaleup *
+                                       bigimg.shape[1],
+                                       self.display_scaleup *
+                                       bigimg.shape[0])))
+
+                if cv2.waitKey(1) == self.quit_key:
+
+                    eventimg = None
+
+        self.image_prev = image
+
+        return eventimg
 
     def _color2gray(self, img):
 

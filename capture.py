@@ -26,11 +26,10 @@ dvs = SimDvs(threshold=4, display_scaleup=1)
 
 cap = cv2.VideoCapture(0)
 
-while True:
+while cap.isOpened():
 
     _, image = cap.read()
 
-    dvs.getEvents(image)
+    if dvs.getEvents(image) is None:
 
-    if cv2.waitKey(1) == 27:
         break
