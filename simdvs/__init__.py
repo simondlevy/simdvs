@@ -2,9 +2,6 @@
 A Python class to simulate a Dynamic Vision Sensor through first-differencing
 of current and previous image from an ordinary camera.
 
-Run it as a standalone script to see the difference between two images
-in the images/ directory.
-
 Copyright (C) 2023 Simon D. Levy, Armando Mendez-Anastasio
 
 This program is free software; you can redistribute it and/or modify it under
@@ -70,11 +67,11 @@ class SimDvs:
             bigimg[:, cols:(2*cols), :] = colorimg
 
             cv2.imshow('Events',
-                       cv2.resize(bigimg,
-                                  (self.display_scaleup * bigimg.shape[1],
-                                   self.display_scaleup * bigimg.shape[0])))
+                    cv2.resize(bigimg,
+                        (self.display_scaleup * bigimg.shape[1],
+                            self.display_scaleup * bigimg.shape[0])))
 
-        return eventimg
+                        return eventimg
 
     def _color2gray(self, img):
 

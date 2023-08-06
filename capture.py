@@ -1,12 +1,8 @@
 #!/usr/bin/python3
 '''
-A Python class to simulate a Dynamic Vision Sensor through first-differencing
-of current and previous image from an ordinary camera.
+Demo simdvs with camera
 
-Run it as a standalone script to see the difference between two images
-in the images/ directory.
-
-Copyright (C) 2023 Simon D. Levy, Armando Mendez-Anastasio
+Copyright (C) 2023 Simon D. Levy
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
