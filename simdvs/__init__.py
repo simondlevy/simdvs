@@ -45,34 +45,34 @@ class SimDvs:
 
         graycurr = self._color2gray(image)
 
-        eventimg = np.zeros(graycurr.shape, dtype=np.int8)
+        events = np.zeros(graycurr.shape, dtype=np.int8)
 
         if self.image_prev is not None:
 
             grayprev = self._color2gray(self.image_prev)
             diffimg = graycurr - grayprev
 
-            eventimg[diffimg > +self.threshold] = +1
-            eventimg[diffimg < -self.threshold] = -1
+            events[diffimg > +self.threshold] = +1
+            events[diffimg < -self.threshold] = -1
 
             if self.display_scaleup > 0:
 
-                rows, cols = eventimg.shape
+                rows, cols = events.shape
 
-                colorimg = np.zeros((rows, cols, 3))
+                eventimg = np.zeros((rows, cols, 3))
 
                 if self.colorize:
-                    colorimg[eventimg == +1, 1] = 255
-                    colorimg[eventimg == -1, 2] = 255
+                    eventimg[events == +1, 1] = 255
+                    eventimg[events == -1, 2] = 255
                 else:
-                    colorimg[eventimg !=0, :] = 255
+                    eventimg[events !=0, :] = 255
 
-                rows, cols = eventimg.shape
+                rows, cols = events.shape
 
                 bigimg = np.zeros((rows, 2*cols, 3)).astype(np.uint8)
 
                 bigimg[:, :cols, :] = image
-                bigimg[:, cols:(2*cols), :] = colorimg
+                bigimg[:, cols:(2*cols), :] = eventimg
 
                 cv2.imshow('Events',
                            cv2.resize(bigimg,
@@ -83,11 +83,11 @@ class SimDvs:
 
                 if cv2.waitKey(1) == self.quit_key:
 
-                    eventimg = None
+                    events = None
 
         self.image_prev = image
 
-        return eventimg
+        return events
 
     def _color2gray(self, img):
 
