@@ -24,11 +24,17 @@ import cv2
 
 class SimDvs:
 
-    def __init__(self, threshold=0, display_scaleup=0, quit_key=27):
+    def __init__(
+            self,
+            threshold=0,
+            display_scaleup=0,
+            quit_key=27,
+            colorize=True):
 
         self.threshold = threshold
         self.display_scaleup = display_scaleup
         self.quit_key = quit_key
+        self.colorize = colorize
 
         self.image_prev = None
 
@@ -54,8 +60,12 @@ class SimDvs:
                 rows, cols = eventimg.shape
 
                 colorimg = np.zeros((rows, cols, 3))
-                colorimg[eventimg == +1, 1] = 255
-                colorimg[eventimg == -1, 2] = 255
+
+                if self.colorize:
+                    colorimg[eventimg == +1, 1] = 255
+                    colorimg[eventimg == -1, 2] = 255
+                else:
+                    colorimg[eventimg !=0, :] = 255
 
                 rows, cols = eventimg.shape
 
