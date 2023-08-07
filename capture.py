@@ -22,7 +22,7 @@ import cv2
 
 from simdvs import SimDvs
 
-dvs = SimDvs(threshold=4, display_scaleup=1)
+dvs = SimDvs(threshold=4, display_scale=1)
 
 cap = cv2.VideoCapture(0)
 
