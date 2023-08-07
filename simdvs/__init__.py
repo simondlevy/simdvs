@@ -26,11 +26,13 @@ class SimDvs:
 
     def __init__(
             self,
+            resolution=None,
             threshold=0,
             display_scaleup=0,
             quit_key=27,
             colorize=True):
 
+        self.resolution = resolution
         self.threshold = threshold
         self.display_scaleup = display_scaleup
         self.quit_key = quit_key
@@ -55,6 +57,9 @@ class SimDvs:
             events[diffimg > +self.threshold] = +1
             events[diffimg < -self.threshold] = -1
 
+            if self.resolution is not None:
+                events = cv2.resize(events.astype('float32'), (128, 128))
+
             if self.display_scaleup > 0:
 
                 rows, cols = events.shape
@@ -73,7 +78,10 @@ class SimDvs:
 
                 bigimg = np.zeros((rows, 2*cols, 3)).astype(np.uint8)
 
-                bigimg[:, :cols, :] = image
+                bigimg[:, :cols, :] = (
+                        image if self.resolution is None 
+                        else cv2.resize(image, self.resolution))
+
                 bigimg[:, cols:(2*cols), :] = eventimg
 
                 cv2.imshow('Events',
