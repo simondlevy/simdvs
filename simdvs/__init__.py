@@ -60,6 +60,60 @@ class SimDvs:
 
         return events
 
+    def annotate(self, ceventimg):
+        '''
+        Override this method to annotate the event image.
+        '''
+
+        pass
+
+    def _display(self, image, events):
+
+        # Make a color image from the event image
+        rows, cols = events.shape
+        ceventimg = np.zeros((rows, cols, 3))
+
+        # If color was indicated, display positive events as green,
+        # negative as red
+        if self.colorize:
+            ceventimg[events == +1, 1] = 255
+            ceventimg[events == -1, 2] = 255
+
+        # Otherwise, display all events as white
+        else:
+            ceventimg[events != 0, :] = 255
+
+        # Support annotating the event image in a subclass
+        self.annotate(ceventimg)
+
+        # Make two-column image to display the original and events
+        rows, cols = events.shape
+        bigimg = np.zeros((rows, 2*cols, 3)).astype(np.uint8)
+
+        # Fill the first column with the original (resized if
+        # indicated)
+        bigimg[:, :cols, :] = (
+                image if self.resolution is None
+                else cv2.resize(image, self.resolution))
+
+        # fill the second column with the events image
+        bigimg[:, cols:(2*cols), :] = ceventimg
+
+        # Display the two-colum image
+        cv2.imshow('Events',
+                   cv2.resize(bigimg,
+                              (self.display_scale *
+                               bigimg.shape[1],
+                               self.display_scale *
+                               bigimg.shape[0])))
+
+        # If the user hit the quit key, set the events image to None,
+        # indicating quit
+        if cv2.waitKey(1) == self.quit_key:
+            return None
+
+        return events
+
     def _update(self, image, graycurr, events):
 
         # Make a first-difference image between the current and previous
@@ -77,58 +131,9 @@ class SimDvs:
 
         # If display was requested, set it up
         if self.display_scale > 0:
-
-            # Make a color image from the event image
-            rows, cols = events.shape
-            ceventimg = np.zeros((rows, cols, 3))
-
-            # If color was indicated, display positive events as green,
-            # negative as red
-            if self.colorize:
-                ceventimg[events == +1, 1] = 255
-                ceventimg[events == -1, 2] = 255
-
-            # Otherwise, display all events as white
-            else:
-                ceventimg[events != 0, :] = 255
-
-            # Support annotating the event image in a subclass
-            self.annotate(ceventimg)
-
-            # Make two-column image to display the original and events
-            rows, cols = events.shape
-            bigimg = np.zeros((rows, 2*cols, 3)).astype(np.uint8)
-
-            # Fill the first column with the original (resized if
-            # indicated)
-            bigimg[:, :cols, :] = (
-                    image if self.resolution is None
-                    else cv2.resize(image, self.resolution))
-
-            # fill the second column with the events image
-            bigimg[:, cols:(2*cols), :] = ceventimg
-
-            # Display the two-colum image
-            cv2.imshow('Events',
-                       cv2.resize(bigimg,
-                                  (self.display_scale *
-                                   bigimg.shape[1],
-                                   self.display_scale *
-                                   bigimg.shape[0])))
-
-            # If the user hit the quit key, set the events image to None,
-            # indicating quit
-            if cv2.waitKey(1) == self.quit_key:
-                return None
+            events = self._display(image, events)
 
         return events
-
-    def annotate(self, ceventimg):
-        '''
-        Override this method to annotate the event image.
-        '''
-
-        pass
 
     def _color2gray(self, img):
 
