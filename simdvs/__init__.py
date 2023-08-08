@@ -27,12 +27,14 @@ class SimDvs:
     def __init__(
             self,
             resolution=None,
+            noise_filter=None,
             threshold=0,
             display_scale=0,
             quit_key=27,
             colorize=True):
 
         self.resolution = resolution
+        self.noise_filter = noise_filter
         self.threshold = threshold
         self.display_scale = display_scale
         self.quit_key = quit_key
@@ -67,6 +69,27 @@ class SimDvs:
 
         pass
 
+    def _update(self, image, graycurr, events):
+
+        # Make a first-difference image between the current and previous
+        # grayscale images
+        grayprev = self._color2gray(self.image_prev)
+        diffimg = graycurr - grayprev
+
+        # Simulate positive and negative events w.r.t. a threshold
+        events[diffimg > +self.threshold] = +1
+        events[diffimg < -self.threshold] = -1
+
+        # If sensor resolution was indicated, resize the event image now
+        if self.resolution is not None:
+            events = cv2.resize(events.astype('float32'), (128, 128))
+
+        # If display was requested, set it up
+        if self.display_scale > 0:
+            events = self._display(image, events)
+
+        return events
+
     def _display(self, image, events):
 
         # Make a color image from the event image
@@ -86,9 +109,11 @@ class SimDvs:
         # Support annotating the event image in a subclass
         self.annotate(ceventimg)
 
-        # Make two-column image to display the original and events
+        # Make two-column image to display the original and events, or three columns
+        # to include filtered events
         rows, cols = events.shape
-        bigimg = np.zeros((rows, 2*cols, 3)).astype(np.uint8)
+        k = 2 if self.noise_filter is None else 3
+        bigimg = np.zeros((rows, k * cols, 3)).astype(np.uint8)
 
         # Fill the first column with the original (resized if
         # indicated)
@@ -111,27 +136,6 @@ class SimDvs:
         # indicating quit
         if cv2.waitKey(1) == self.quit_key:
             return None
-
-        return events
-
-    def _update(self, image, graycurr, events):
-
-        # Make a first-difference image between the current and previous
-        # grayscale images
-        grayprev = self._color2gray(self.image_prev)
-        diffimg = graycurr - grayprev
-
-        # Simulate positive and negative events w.r.t. a threshold
-        events[diffimg > +self.threshold] = +1
-        events[diffimg < -self.threshold] = -1
-
-        # If sensor resolution was indicated, resize the event image now
-        if self.resolution is not None:
-            events = cv2.resize(events.astype('float32'), (128, 128))
-
-        # If display was requested, set it up
-        if self.display_scale > 0:
-            events = self._display(image, events)
 
         return events
 
