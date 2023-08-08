@@ -62,7 +62,7 @@ class SimDvs:
 
         return events
 
-    def annotate(self, ceventimg):
+    def annotate(self, ceventimg, cfiltimg):
         '''
         Override this method to annotate the event image.
         '''
@@ -106,7 +106,7 @@ class SimDvs:
                     else self._colorize(filtered))
 
         # Support annotating the event image in a subclass
-        self.annotate(ceventimg)
+        self.annotate(ceventimg, cfiltimg)
 
         # Make two-column image to display the original and events, or three columns
         # to include filtered events
