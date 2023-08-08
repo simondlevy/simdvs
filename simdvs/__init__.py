@@ -84,13 +84,16 @@ class SimDvs:
         if self.resolution is not None:
             events = cv2.resize(events.astype('float32'), (128, 128))
 
+        filtered = None if self.noise_filter is None else events.copy()
+
         # If display was requested, set it up
         if self.display_scale > 0:
-            events = self._display(image, events)
+            if not self._display(image, events, filtered):
+                return None
 
         return events
 
-    def _display(self, image, events):
+    def _display(self, image, events, filtered):
 
         # Make a color image from the event image
         rows, cols = events.shape
@@ -111,8 +114,8 @@ class SimDvs:
 
         # Make two-column image to display the original and events, or three columns
         # to include filtered events
+        k = 2 if filtered is None else 3
         rows, cols = events.shape
-        k = 2 if self.noise_filter is None else 3
         bigimg = np.zeros((rows, k * cols, 3)).astype(np.uint8)
 
         # Fill the first column with the original (resized if
@@ -132,12 +135,12 @@ class SimDvs:
                                self.display_scale *
                                bigimg.shape[0])))
 
-        # If the user hit the quit key, set the events image to None,
-        # indicating quit
+        # Check whether the user hit the quit key
         if cv2.waitKey(1) == self.quit_key:
-            return None
+            return False
 
-        return events
+        return True
+
 
     def _color2gray(self, img):
 
