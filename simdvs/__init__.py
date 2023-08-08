@@ -91,23 +91,29 @@ class SimDvs:
             if not self._display(image, events, filtered):
                 return None
 
-        return events
+        return events if filtered is None else filtered
 
     def _display(self, image, events, filtered):
 
-        # Make a color image from the event image
+        # Make a color image from the event image (and filtered image if available)
         rows, cols = events.shape
         ceventimg = np.zeros((rows, cols, 3))
+        cfiltimg = np.zeros((rows, cols, 3))
 
         # If color was indicated, display positive events as green,
         # negative as red
         if self.colorize:
+
             ceventimg[events == +1, 1] = 255
             ceventimg[events == -1, 2] = 255
+
+            cfiltimg[filtered == +1, 1] = 255
+            cfiltimg[filtered == -1, 2] = 255
 
         # Otherwise, display all events as white
         else:
             ceventimg[events != 0, :] = 255
+            cfiltimg[filtered != 0, :] = 255
 
         # Support annotating the event image in a subclass
         self.annotate(ceventimg)
@@ -126,6 +132,10 @@ class SimDvs:
 
         # fill the second column with the events image
         bigimg[:, cols:(2*cols), :] = ceventimg
+
+        # fill the third column with the filtered events image if available
+        if filtered is not None:
+            bigimg[:, 2*cols:(3*cols), :] = cfiltimg
 
         # Display the two-colum image
         cv2.imshow('Events',
