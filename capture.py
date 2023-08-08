@@ -19,9 +19,11 @@ Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 '''
 
 import cv2
+import numpy as np
 
 from simdvs import SimDvs
 
+# dvs = SimDvs(threshold=4, display_scale=1, resolution=(128,128))
 dvs = SimDvs(threshold=4, display_scale=1)
 
 cap = cv2.VideoCapture(0)
@@ -30,6 +32,13 @@ while cap.isOpened():
 
     _, image = cap.read()
 
-    if dvs.getEvents(image) is None:
+    events = dvs.getEvents(image)
 
+    if events is None:
         break
+
+    else:
+
+        rows, cols = events.shape
+
+
