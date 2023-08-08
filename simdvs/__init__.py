@@ -84,7 +84,7 @@ class SimDvs:
         if self.resolution is not None:
             events = cv2.resize(events.astype('float32'), (128, 128))
 
-        filtered = None if self.noise_filter is None else events.copy()
+        filtered = None if self.noise_filter is None else self._filter(events)
 
         # If display was requested, set it up
         if self.display_scale > 0:
@@ -93,31 +93,17 @@ class SimDvs:
 
         return events if filtered is None else filtered
 
-    def _colorize(self, events):
+    def _filter(self, events):
 
-        rows, cols = events.shape
-        ceventimg = np.zeros((rows, cols, 3))
-
-        # If color was indicated, display positive events as green,
-        # negative as red
-        if self.colorize:
-
-            ceventimg[events == +1, 1] = 255
-            ceventimg[events == -1, 2] = 255
-
-        # Otherwise, display all events as white
-        else:
-            ceventimg[events != 0, :] = 255
-
-        return ceventimg
-
+        return events.copy()
 
     def _display(self, image, events, filtered):
 
         # Make a color image from the event image (and filtered image if available)
         rows, cols = events.shape
         ceventimg = self._colorize(events)
-        cfiltimg = None if self.noise_filter is None else self._colorize(filtered)
+        cfiltimg = (None if self.noise_filter is None 
+                    else self._colorize(filtered))
 
         # Support annotating the event image in a subclass
         self.annotate(ceventimg)
@@ -155,6 +141,23 @@ class SimDvs:
 
         return True
 
+    def _colorize(self, events):
+
+        rows, cols = events.shape
+        ceventimg = np.zeros((rows, cols, 3))
+
+        # If color was indicated, display positive events as green,
+        # negative as red
+        if self.colorize:
+
+            ceventimg[events == +1, 1] = 255
+            ceventimg[events == -1, 2] = 255
+
+        # Otherwise, display all events as white
+        else:
+            ceventimg[events != 0, :] = 255
+
+        return ceventimg
 
     def _color2gray(self, img):
 
