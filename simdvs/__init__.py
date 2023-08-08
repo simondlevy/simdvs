@@ -73,8 +73,9 @@ class SimDvs:
             if self.resolution is not None:
                 rows, cols = events.shape
                 marg = (cols - rows) // 2
+                events = events[:, marg:-marg]
                 events = cv2.resize(events.astype('float32'), self.resolution)
-                cpyimg = cv2.resize(events.astype('float32'), (self.resolution[0], self.resolution[1], 3))
+                cpyimg = cpyimg[:,marg:-marg]
 
             # If display was requested, set it up
             if self.display_scale > 0:
@@ -117,8 +118,7 @@ class SimDvs:
                                        self.display_scale *
                                        bigimg.shape[0])))
 
-                # If the user hit the quit key, set the events image to None,
-                # indicating quit
+
                 if cv2.waitKey(1) == self.quit_key:
                     events = None
 
