@@ -63,9 +63,18 @@ class SimDvs:
             events[diffimg > +self.threshold] = +1
             events[diffimg < -self.threshold] = -1
 
-            # If sensor resolution was indicated, resize the event image now
+            # Assume no resolution, hence no clipping margin
+            marg = 0
+
+            cpyimg = image.copy()
+
+            # If sensor resolution was indicated, resize the event image now,
+            # clipping at the horizontal margin as needed
             if self.resolution is not None:
-                events = cv2.resize(events.astype('float32'), (128, 128))
+                rows, cols = events.shape
+                marg = (cols - rows) // 2
+                events = cv2.resize(events.astype('float32'), self.resolution)
+                cpyimg = cv2.resize(events.astype('float32'), (self.resolution[0], self.resolution[1], 3))
 
             # If display was requested, set it up
             if self.display_scale > 0:
@@ -95,7 +104,7 @@ class SimDvs:
                 # indicated)
                 bigimg[:, :cols, :] = (
                         image if self.resolution is None
-                        else cv2.resize(image, self.resolution))
+                        else cv2.resize(cpyimg, self.resolution))
 
                 # fill the second column with the events image
                 bigimg[:, cols:(2*cols), :] = ceventimg
