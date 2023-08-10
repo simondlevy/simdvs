@@ -24,17 +24,10 @@ import cv2
 
 class SimDvs:
 
-    def __init__(
-            self,
-            resolution=None,
-            threshold=0,
-            quit_key=27,
-            colorize=True):
+    def __init__( self, resolution=None, threshold=0):
 
         self.resolution = resolution
         self.threshold = threshold
-        self.quit_key = quit_key
-        self.colorize = colorize
 
         self.image_prev = None
 
@@ -77,11 +70,11 @@ class SimDvs:
 
         pass
 
-    def display(self, image, events, scale=1):
+    def display(self, image, events, scale=1, quit_key=27, colorize=True):
 
         # Make a color image from the event image
         rows, cols = events.shape
-        ceventimg = self._colorize(events)
+        ceventimg = self._colorize(events, colorize)
 
         # Support annotating the event image in a subclass
         self.annotate(ceventimg)
@@ -107,19 +100,19 @@ class SimDvs:
                                scale * bigimg.shape[0])))
 
         # Check whether the user hit the quit key
-        if cv2.waitKey(1) == self.quit_key:
+        if cv2.waitKey(1) == quit_key:
             return False
 
         return True
 
-    def _colorize(self, events):
+    def _colorize(self, events, colorize):
 
         rows, cols = events.shape
         ceventimg = np.zeros((rows, cols, 3))
 
         # If color was indicated, display positive events as green,
         # negative as red
-        if self.colorize:
+        if colorize:
 
             ceventimg[events == +1, 1] = 255
             ceventimg[events == -1, 2] = 255
