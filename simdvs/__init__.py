@@ -70,7 +70,9 @@ class SimDvs:
 
         pass
 
-    def display(self, image, events, scaleup=1, quit_key=27, colorize=True):
+    def display(
+            self, image, events, 
+            filtered=None, scaleup=1, quit_key=27, colorize=True):
 
         # Make a color image from the event image
         rows, cols = events.shape
@@ -80,19 +82,24 @@ class SimDvs:
         self.annotate(ceventimg)
 
         # Make two-column image to display the original and events, or three columns
-        k = 2
+        k = 2 if filtered is None else 3
         rows, cols = events.shape
         bigimg = np.zeros((rows, k * cols, 3)).astype(np.uint8)
 
-        newimg = image if self.resolution is None else cv2.resize(image, self.resolution)
-
         # Fill the first column with the original (resized if # indicated)
-        bigimg[:, :cols, :] = newimg
+        bigimg[:, :cols, :] = (
+                image if self.resolution is None 
+                else cv2.resize(image, self.resolution))
 
-        # fill the second column with the events image
+        # Fill the second column with the events image
         bigimg[:, cols:(2*cols), :] = ceventimg
 
-        # Display the two-colum image
+        # Fill the third column with the filtered image if provided
+        if filtered is not None:
+            bigimg[:, (2*cols):(3*cols), :] = self._colorize(filtered, 
+                                                             colorize)
+
+        # Display the big image
         cv2.imshow('Events',
                    cv2.resize(bigimg,
                               (scaleup * bigimg.shape[1],
