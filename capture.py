@@ -19,8 +19,6 @@ Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 '''
 
 import cv2
-import numpy as np
-from time import time
 
 from simdvs import SimDvs
 
@@ -40,5 +38,6 @@ def main():
         if not dvs.display(image, events, scaleup=2):
 
             break
+
 
 main()
