@@ -112,6 +112,10 @@ class SimDvs:
 
         return True
 
+    def filter(self, events, noise_filter):
+
+        return events.copy()
+
     def _colorize(self, events, colorize):
 
         rows, cols = events.shape
