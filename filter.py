@@ -40,7 +40,10 @@ def main():
 
     start = time()
 
+    # Make an empty image with an X to show no filtering
     nofiltimg = np.zeros(RESOLUTION)
+    np.fill_diagonal(nofiltimg, -1)
+    nofiltimg += np.fliplr(nofiltimg)
 
     while cap.isOpened():
 
@@ -48,9 +51,11 @@ def main():
 
         events = dvs.getEvents(image)
 
+        low_density =(np.count_nonzero(events) / np.prod(events.shape) <
+                      DENSITY_THRESHOLD)
+
         filtered = (dvs.filter(events, noise_filter)
-                    if (np.count_nonzero(events) / np.prod(events.shape) <
-                        DENSITY_THRESHOLD)
+                    if low_density
                     else nofiltimg)
 
         # if not dvs.display(image, events, filtered, scaleup=2):

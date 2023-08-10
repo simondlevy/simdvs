@@ -86,7 +86,6 @@ class SimDvs:
             self, 
             image, 
             events, 
-            title='Events',
             filtered=None, 
             scaleup=1, 
             quit_key=27, 
@@ -118,10 +117,8 @@ class SimDvs:
             self.annotate(cfiltered)
             bigimg[:, (2*cols):(3*cols), :] = cfiltered
 
-        print(type(title))
-
         # Display the big image
-        cv2.imshow(title,
+        cv2.imshow('Events',
                    cv2.resize(bigimg,
                               (scaleup * bigimg.shape[1],
                                scaleup * bigimg.shape[0])))
