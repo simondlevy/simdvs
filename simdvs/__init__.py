@@ -18,8 +18,19 @@ this program; if not, write to the Free Software Foundation, Inc., 51
 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 '''
 
+from time import time
 import numpy as np
 import cv2
+
+class _Event:
+    '''Mirrors event structure in dvs-filter repo
+    '''
+
+    def __init__(self, timestamp, x, y):
+
+        self.timestamp = timestamp
+        self.x = x
+        self.y = y
 
 
 class SimDvs:
@@ -30,6 +41,7 @@ class SimDvs:
         self.threshold = threshold
 
         self.image_prev = None
+        self.start_time = time()
 
     def getEvents(self, image):
         '''
@@ -118,8 +130,13 @@ class SimDvs:
 
         nz = np.where(events)
 
-        for x,y in zip(nz[0], nz[1]):
-            filtered[x,y] = events[x,y]
+        for x, y in zip(nz[0], nz[1]):
+
+            e = _Event(int((time() - self.start_time) * 1e6), x, y)
+
+            if noise_filter.check(e):
+
+                filtered[x, y] = events[x, y]
 
         return filtered
 
