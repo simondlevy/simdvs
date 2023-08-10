@@ -27,17 +27,20 @@ from simdvs import SimDvs
 from dvs_filters.stcf import SpatioTemporalCorrelationFilter
 
 DENSITY_THRESHOLD = 0.01
+RESOLUTION = 128, 128
 
 
 def main():
 
-    dvs = SimDvs(threshold=4, resolution=(128, 128))
+    dvs = SimDvs(threshold=4, resolution=RESOLUTION)
 
     cap = cv2.VideoCapture(0)
 
     noise_filter = SpatioTemporalCorrelationFilter()
 
     start = time()
+
+    nofiltimg = np.zeros(RESOLUTION)
 
     while cap.isOpened():
 
@@ -48,9 +51,10 @@ def main():
         filtered = (dvs.filter(events, noise_filter)
                     if (np.count_nonzero(events) / np.prod(events.shape) <
                         DENSITY_THRESHOLD)
-                    else None)
+                    else nofiltimg)
 
-        if not dvs.display(image, events, filtered, scaleup=2):
+        # if not dvs.display(image, events, filtered, scaleup=2):
+        if not dvs.display(image, events, filtered=filtered, scaleup=2):
 
             break
 
