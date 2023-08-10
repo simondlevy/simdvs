@@ -27,14 +27,12 @@ class SimDvs:
     def __init__(
             self,
             resolution=None,
-            noise_filter=None,
             threshold=0,
             display_scale=0,
             quit_key=27,
             colorize=True):
 
         self.resolution = resolution
-        self.noise_filter = noise_filter
         self.threshold = threshold
         self.display_scale = display_scale
         self.quit_key = quit_key
@@ -42,7 +40,7 @@ class SimDvs:
 
         self.image_prev = None
 
-    def getEvents(self, image):
+    def getEvents(self, image, noise_filter=None):
         '''
         Returns current event image, or None if user quits display
         '''
@@ -55,7 +53,7 @@ class SimDvs:
 
         # Once we have a current and previous image, we can compute events
         if self.image_prev is not None:
-            events = self._update(image, graycurr, events)
+            events = self._update(image, graycurr, events, noise_filter)
 
         # Track the previous image for first-differencing
         self.image_prev = image
@@ -69,7 +67,7 @@ class SimDvs:
 
         pass
 
-    def _update(self, image, graycurr, events):
+    def _update(self, image, graycurr, events, noise_filter):
 
         # Make a first-difference image between the current and previous
         # grayscale images
@@ -84,26 +82,26 @@ class SimDvs:
         if self.resolution is not None:
             events = cv2.resize(events.astype('float32'), (128, 128))
 
-        filtered = None if self.noise_filter is None else self._filter(events)
+        filtered = (None if noise_filter is None
+                    else self._filter(events, noise_filter))
 
         # If display was requested, set it up
         if self.display_scale > 0:
-            if not self._display(image, events, filtered):
+            if not self._display(image, events, filtered, noise_filter):
                 return None
 
         return events if filtered is None else filtered
 
-    def _filter(self, events):
+    def _filter(self, events, noise_filter):
 
         return events.copy()
 
-    def _display(self, image, events, filtered):
+    def _display(self, image, events, filtered, noise_filter):
 
         # Make a color image from the event image (and filtered image if available)
         rows, cols = events.shape
         ceventimg = self._colorize(events)
-        cfiltimg = (None if self.noise_filter is None 
-                    else self._colorize(filtered))
+        cfiltimg = None if noise_filter is None else self._colorize(filtered)
 
         # Support annotating the event image in a subclass
         self.annotate(ceventimg, cfiltimg)
