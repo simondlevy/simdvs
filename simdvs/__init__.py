@@ -96,8 +96,9 @@ class SimDvs:
 
         # Fill the third column with the filtered image if provided
         if filtered is not None:
-            bigimg[:, (2*cols):(3*cols), :] = self._colorize(filtered, 
-                                                             colorize)
+            cfiltered = self._colorize(filtered, colorize)
+            self.annotate(cfiltered)
+            bigimg[:, (2*cols):(3*cols), :] = cfiltered
 
         # Display the big image
         cv2.imshow('Events',
