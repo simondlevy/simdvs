@@ -34,11 +34,6 @@ while cap.isOpened():
 
     events = dvs.getEvents(image)
 
-    if events is None:
+    if not dvs.display(image, events):
+
         break
-
-    else:
-
-        rows, cols = events.shape
-
-

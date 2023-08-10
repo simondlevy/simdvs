@@ -65,9 +65,6 @@ class SimDvs:
             if self.resolution is not None:
                 events = cv2.resize(events.astype('float32'), (128, 128))
 
-            if not self.display(image, events):
-                return None
-
         # Track the previous image for first-differencing
         self.image_prev = image
 
