@@ -24,7 +24,7 @@ from time import time
 
 from simdvs import SimDvs
 
-from dvs_filters.stcf import SpatioTemporalCorrelationFilter
+from dvs_filters.stcf import SpatioTemporalCorrelationFilter as NoiseFilter
 
 DENSITY_THRESHOLD = 0.01
 RESOLUTION = 128, 128
@@ -36,7 +36,7 @@ def main():
 
     cap = cv2.VideoCapture(0)
 
-    noise_filter = SpatioTemporalCorrelationFilter()
+    noise_filter = NoiseFilter()
 
     start = time()
 
