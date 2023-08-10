@@ -114,7 +114,14 @@ class SimDvs:
 
     def filter(self, events, noise_filter):
 
-        return events.copy()
+        filtered = np.zeros(events.shape)
+
+        nz = np.where(events)
+
+        for x,y in zip(nz[0], nz[1]):
+            filtered[x,y] = events[x,y]
+
+        return filtered
 
     def _colorize(self, events, colorize):
 
