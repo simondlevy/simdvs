@@ -40,7 +40,7 @@ class SimDvs:
 
         self.image_prev = None
 
-    def getEvents(self, image, noise_filter=None):
+    def getEvents(self, image):
         '''
         Returns current event image, or None if user quits display
         '''
@@ -53,62 +53,48 @@ class SimDvs:
 
         # Once we have a current and previous image, we can compute events
         if self.image_prev is not None:
-            events = self._update(image, graycurr, events, noise_filter)
+
+            # Make a first-difference image between the current and previous
+            # grayscale images
+            grayprev = self._color2gray(self.image_prev)
+            diffimg = graycurr - grayprev
+
+            # Simulate positive and negative events w.r.t. a threshold
+            events[diffimg > +self.threshold] = +1
+            events[diffimg < -self.threshold] = -1
+
+            # If sensor resolution was indicated, resize the event image now
+            if self.resolution is not None:
+                events = cv2.resize(events.astype('float32'), (128, 128))
+
+            # If display was requested, set it up
+            if self.display_scale > 0:
+                if not self._display(image, events):
+                    return None
 
         # Track the previous image for first-differencing
         self.image_prev = image
 
         return events
 
-    def annotate(self, ceventimg, cfiltimg):
+    def annotate(self, ceventimg):
         '''
         Override this method to annotate the event image.
         '''
 
         pass
 
-    def _update(self, image, graycurr, events, noise_filter):
+    def _display(self, image, events):
 
-        # Make a first-difference image between the current and previous
-        # grayscale images
-        grayprev = self._color2gray(self.image_prev)
-        diffimg = graycurr - grayprev
-
-        # Simulate positive and negative events w.r.t. a threshold
-        events[diffimg > +self.threshold] = +1
-        events[diffimg < -self.threshold] = -1
-
-        # If sensor resolution was indicated, resize the event image now
-        if self.resolution is not None:
-            events = cv2.resize(events.astype('float32'), (128, 128))
-
-        filtered = (None if noise_filter is None
-                    else self._filter(events, noise_filter))
-
-        # If display was requested, set it up
-        if self.display_scale > 0:
-            if not self._display(image, events, filtered, noise_filter):
-                return None
-
-        return events if filtered is None else filtered
-
-    def _filter(self, events, noise_filter):
-
-        return events.copy()
-
-    def _display(self, image, events, filtered, noise_filter):
-
-        # Make a color image from the event image (and filtered image if available)
+        # Make a color image from the event image
         rows, cols = events.shape
         ceventimg = self._colorize(events)
-        cfiltimg = None if noise_filter is None else self._colorize(filtered)
 
         # Support annotating the event image in a subclass
-        self.annotate(ceventimg, cfiltimg)
+        self.annotate(ceventimg)
 
         # Make two-column image to display the original and events, or three columns
-        # to include filtered events
-        k = 2 if filtered is None else 3
+        k = 2
         rows, cols = events.shape
         bigimg = np.zeros((rows, k * cols, 3)).astype(np.uint8)
 
@@ -120,10 +106,6 @@ class SimDvs:
 
         # fill the second column with the events image
         bigimg[:, cols:(2*cols), :] = ceventimg
-
-        # fill the third column with the filtered events image if available
-        if filtered is not None:
-            bigimg[:, 2*cols:(3*cols), :] = cfiltimg
 
         # Display the two-colum image
         cv2.imshow('Events',
