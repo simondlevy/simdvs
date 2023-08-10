@@ -24,12 +24,41 @@ from time import time
 
 from simdvs import SimDvs
 
+from dvs_filters.stcf import SpatioTemporalCorrelationFilter
+
+class Event:
+
+    def __init__(self, timestamp, x, y):
+
+        self.timestamp = timestamp
+        self.x = x
+        self.y = y
+
+def filter_noise(events, noise_filter, start_time):
+
+    filtered = np.zeros(events.shape)
+
+    nz = np.where(events)
+
+    for x,y in zip(nz[0], nz[1]):
+
+        e = Event(int((time() - start_time) * 1e6), x, y)
+
+        if noise_filter.check(e):
+
+            filtered[x,y] = events[x,y]
+
+    return filtered
 
 def main():
 
-    dvs = SimDvs(threshold=4)
+    dvs = SimDvs(threshold=4, resolution=(128,128))
 
     cap = cv2.VideoCapture(0)
+
+    noise_filter = SpatioTemporalCorrelationFilter()
+
+    start = time()
 
     while cap.isOpened():
 
@@ -37,7 +66,11 @@ def main():
 
         events = dvs.getEvents(image)
 
-        if not dvs.display(image, events, scaleup=2):
+        filtered = (filter_noise(events, noise_filter, start) 
+                    if np.count_nonzero(events) / np.prod(events.shape) < .01
+                    else None)
+
+        if not dvs.display(image, events, filtered, scaleup=2):
 
             break
 
