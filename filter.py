@@ -26,6 +26,8 @@ from simdvs import SimDvs
 
 from dvs_filters.stcf import SpatioTemporalCorrelationFilter
 
+DENSITY_THRESHOLD = 0.01
+
 class Event:
 
     def __init__(self, timestamp, x, y):
@@ -67,7 +69,8 @@ def main():
         events = dvs.getEvents(image)
 
         filtered = (filter_noise(events, noise_filter, start) 
-                    if np.count_nonzero(events) / np.prod(events.shape) < .01
+                    if (np.count_nonzero(events) / np.prod(events.shape) < 
+                        DENSITY_THRESHOLD)
                     else None)
 
         if not dvs.display(image, events, filtered, scaleup=2):
