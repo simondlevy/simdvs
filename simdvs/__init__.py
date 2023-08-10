@@ -54,12 +54,12 @@ class SimDvs:
             events[diffimg > +self.threshold] = +1
             events[diffimg < -self.threshold] = -1
 
-            # If sensor resolution was indicated, resize the event image now
-            if self.resolution is not None:
-                events = cv2.resize(events.astype('float32'), (128, 128))
-
         # Track the previous image for first-differencing
         self.image_prev = image
+
+        # If sensor resolution was indicated, resize the event image now
+        if self.resolution is not None:
+            events = cv2.resize(events.astype('float32'), (128, 128))
 
         return events
 
@@ -70,7 +70,7 @@ class SimDvs:
 
         pass
 
-    def display(self, image, events, scale=1, quit_key=27, colorize=True):
+    def display(self, image, events, scaleup=1, quit_key=27, colorize=True):
 
         # Make a color image from the event image
         rows, cols = events.shape
@@ -84,11 +84,10 @@ class SimDvs:
         rows, cols = events.shape
         bigimg = np.zeros((rows, k * cols, 3)).astype(np.uint8)
 
-        # Fill the first column with the original (resized if
-        # indicated)
-        bigimg[:, :cols, :] = (
-                image if self.resolution is None
-                else cv2.resize(image, self.resolution))
+        newimg = image if self.resolution is None else cv2.resize(image, self.resolution)
+
+        # Fill the first column with the original (resized if # indicated)
+        bigimg[:, :cols, :] = newimg
 
         # fill the second column with the events image
         bigimg[:, cols:(2*cols), :] = ceventimg
@@ -96,8 +95,8 @@ class SimDvs:
         # Display the two-colum image
         cv2.imshow('Events',
                    cv2.resize(bigimg,
-                              (scale * bigimg.shape[1],
-                               scale * bigimg.shape[0])))
+                              (scaleup * bigimg.shape[1],
+                               scaleup * bigimg.shape[0])))
 
         # Check whether the user hit the quit key
         if cv2.waitKey(1) == quit_key:
