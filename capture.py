@@ -24,7 +24,7 @@ import numpy as np
 from simdvs import SimDvs
 
 # dvs = SimDvs(threshold=4, display_scale=1, resolution=(128,128))
-dvs = SimDvs(threshold=4, display_scale=1)
+dvs = SimDvs(threshold=4)
 
 cap = cv2.VideoCapture(0)
 

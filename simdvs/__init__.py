@@ -28,13 +28,11 @@ class SimDvs:
             self,
             resolution=None,
             threshold=0,
-            display_scale=0,
             quit_key=27,
             colorize=True):
 
         self.resolution = resolution
         self.threshold = threshold
-        self.display_scale = display_scale
         self.quit_key = quit_key
         self.colorize = colorize
 
@@ -67,10 +65,8 @@ class SimDvs:
             if self.resolution is not None:
                 events = cv2.resize(events.astype('float32'), (128, 128))
 
-            # If display was requested, set it up
-            if self.display_scale > 0:
-                if not self._display(image, events):
-                    return None
+            if not self.display(image, events):
+                return None
 
         # Track the previous image for first-differencing
         self.image_prev = image
@@ -84,7 +80,7 @@ class SimDvs:
 
         pass
 
-    def _display(self, image, events):
+    def display(self, image, events, scale=1):
 
         # Make a color image from the event image
         rows, cols = events.shape
@@ -110,10 +106,8 @@ class SimDvs:
         # Display the two-colum image
         cv2.imshow('Events',
                    cv2.resize(bigimg,
-                              (self.display_scale *
-                               bigimg.shape[1],
-                               self.display_scale *
-                               bigimg.shape[0])))
+                              (scale * bigimg.shape[1],
+                               scale * bigimg.shape[0])))
 
         # Check whether the user hit the quit key
         if cv2.waitKey(1) == self.quit_key:
