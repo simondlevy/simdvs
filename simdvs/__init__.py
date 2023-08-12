@@ -79,50 +79,36 @@ class SimDvs:
         '''
         Override this method to annotate the event image.
         '''
-
         pass
 
-    def display(
-            self, 
-            image, 
-            events, 
-            filtered=None, 
-            scaleup=1, 
-            quit_key=27, 
-            colorize=True):
+    def display(self, image, events, scaleup=1, quit_key=27, colorize=True):
 
         # Make a color image from the event image
         rows, cols = events.shape
         ceventimg = self._colorize(events, colorize)
 
-        # Support annotating the event image in a subclass
-        self.annotate(ceventimg)
-
-        # Make two-column image to display the original and events, or three columns
-        k = 2 if filtered is None else 3
+        # Make two-column image to display the original and events
         rows, cols = events.shape
-        bigimg = np.zeros((rows, k * cols, 3)).astype(np.uint8)
+        wideimg = np.zeros((rows, 2 * cols, 3)).astype(np.uint8)
 
         # Fill the first column with the original (resized if # indicated)
-        bigimg[:, :cols, :] = (
+        wideimg[:, :cols, :] = (
                 image if self.resolution is None 
                 else cv2.resize(image, self.resolution))
 
         # Fill the second column with the events image
-        bigimg[:, cols:(2*cols), :] = ceventimg
+        wideimg[:, cols:(2*cols), :] = ceventimg
 
-        # Fill the third column with the filtered image if provided
-        if filtered is not None:
-            cfiltered = self._colorize(filtered, colorize)
-            self.annotate(cfiltered)
-            bigimg[:, (2*cols):(3*cols), :] = cfiltered
+        # Scale up the two-column image
+        bigimg = cv2.resize(
+                wideimg, 
+                (scaleup * wideimg.shape[1], scaleup * wideimg.shape[0]))
 
-        # Display the big image
-        cv2.imshow('Events',
-                   cv2.resize(bigimg,
-                              (scaleup * bigimg.shape[1],
-                               scaleup * bigimg.shape[0])))
+        # Support annotating the scaled-up image in a subclass
+        self.annotate(bigimg[:, scaleup*cols:(2*scaleup*cols), :])
 
+        # Display the scaled-up image
+        cv2.imshow('Events', bigimg)
         # Check whether the user hit the quit key
         if cv2.waitKey(1) == quit_key:
             return False
