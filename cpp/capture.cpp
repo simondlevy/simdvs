@@ -1,34 +1,56 @@
+/*
+Demo simdvs with camera
+
+Copyright (C) 2023 Simon D. Levy
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program; if not, write to the Free Software Foundation, Inc., 51
+Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
+
 #include<opencv2/opencv.hpp>
 #include<iostream>
+#include "simdvs.hpp"
 
 using namespace std;
 using namespace cv;
 
 int main() 
 {
-   Mat myImage;//Declaring a matrix to load the frames//
+    VideoCapture cap(0);
 
-   namedWindow("Video Player");//Declaring the video to show the video//
+    static SimDvs dvs;
 
-   VideoCapture cap(0);//Declaring an object to capture stream of frames from default camera//
+    while (true) { 
 
-   if (!cap.isOpened()){ //This section prompt an error message if no video stream is found//
-      cout << "No video stream detected" << endl;
-      system("pause");
-      return-1;
-   }
+        Mat image;
 
-   while (true){ //Taking an everlasting loop to show the video//
-      cap >> myImage;
-      if (myImage.empty()){ //Breaking the loop if no video frame is detected//
-         break;
-      }
-      imshow("Video Player", myImage);//Showing the video//
-      char c = (char)waitKey(25);//Allowing 25 milliseconds frame processing time and initiating break condition//
-      if (c == 27){ //If 'Esc' is entered break the loop//
-         break;
-      }
-   }
-   cap.release();//Releasing the buffer memory//
-   return 0;
+        cap >> image;
+
+        auto events = dvs.getEvents(image);
+
+        if (!dvs.display(image, events)) {
+            break;
+        }
+
+        /*
+           imshow("Events", img);
+
+           if (waitKey(1) == 27) {  // ESC
+           break;
+           }*/
+    }
+
+    cap.release();
+
+    return 0;
 }

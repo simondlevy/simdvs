@@ -1,8 +1,8 @@
-'''
-A Python class to simulate a Dynamic Vision Sensor through first-differencing
+/*
+A ++ class to simulate a Dynamic Vision Sensor through first-differencing
 of current and previous image from an ordinary camera.
 
-Copyright (C) 2023 Simon D. Levy, Armando Mendez-Anastasio
+Copyright (C) 2023 Simon D. Levy
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,12 +16,37 @@ PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program; if not, write to the Free Software Foundation, Inc., 51
 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
+*/
 
-from time import time
-import numpy as np
-import cv2
+#pragma once
 
+#include<opencv2/opencv.hpp>
+
+using namespace cv;
+
+class SimDvs {
+
+    public:
+
+        SimDvs(void)
+        {
+        }
+
+        void * getEvents(const Mat & image)
+        {
+            return NULL;
+        }
+
+        bool display(const Mat image, const void * events)
+        {
+            imshow("Events", image);
+
+            return waitKey(1) != 27; // ESC
+        }
+
+};
+
+/*
 class _Event:
     '''Mirrors event structure in dvs-filter repo
     '''
@@ -109,9 +134,11 @@ class SimDvs:
 
         # Display the scaled-up image
         cv2.imshow('Events', bigimg)
-
         # Check whether the user hit the quit key
-        return cv2.waitKey(1) != quit_key
+        if cv2.waitKey(1) == quit_key:
+            return False
+
+        return True
 
     def filter(self, events, noise_filter):
 
@@ -151,3 +178,5 @@ class SimDvs:
 
         # Convert to grayscale and downsample for subtraction
         return (cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) >> 1).astype(np.int8)
+
+*/
