@@ -2,4 +2,4 @@
 
 <img src="simdvs.gif">
 
-Simple Python-based Dynamic Vision Sensor simulator
+Simple Dynamic Vision Sensor simulator in Python and C++
